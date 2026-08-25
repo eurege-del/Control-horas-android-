@@ -1,6 +1,10 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 package com.example.controlhoras
-
+import androidx.compose.foundation.Image
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import android.content.Context
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
