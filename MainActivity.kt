@@ -160,6 +160,7 @@ fun ControlHorasApp(context: Context) {
         modifier = Modifier.fillMaxSize()
     ) {
 
+        // FONDO CON EL LOGO
         Image(
             painter = painterResource(
                 id = R.drawable.icono_tu_tiempo_trabajado
@@ -168,8 +169,8 @@ fun ControlHorasApp(context: Context) {
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(30.dp)
-                .alpha(0.08f),
+                .padding(10.dp)
+                .alpha(0.25f),
             alignment = Alignment.Center
         )
 
