@@ -39,7 +39,12 @@ data class DiaTrabajo(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { MaterialTheme { ControlHorasApp(this) } }
+
+        setContent {
+            MaterialTheme {
+                Text("La aplicación funciona")
+            }
+        }
     }
 }
 
