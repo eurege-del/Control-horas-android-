@@ -8,9 +8,10 @@ import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,8 +20,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.json.JSONArray
@@ -39,6 +44,7 @@ data class DiaTrabajo(
 )
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -150,271 +156,292 @@ fun ControlHorasApp(context: Context) {
         guardarDias(context, mes, ano, dias)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text("CONTROL HORAS")
-                }
-            )
-        }
-    ) { padding ->
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-        Column(
+        // FONDO CON EL LOGO
+        Image(
+            painter = painterResource(
+                id = R.drawable.icono_tu_tiempo_trabajado
+            ),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
             modifier = Modifier
-                .padding(padding)
-                .padding(12.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
+                .padding(10.dp)
+                .alpha(0.25f),
+            alignment = Alignment.Center
+        )
 
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = {
-                    nombre = it
-                },
-                label = {
-                    Text("Nombre")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SelectorMes(
-                    mes,
-                    { mes = it },
-                    Modifier.weight(1f)
-                )
-
-                SelectorAno(
-                    ano,
-                    { ano = it },
-                    Modifier.weight(1f)
+        Scaffold(
+            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text("CONTROL HORAS")
+                    }
                 )
             }
+        ) { padding ->
 
-            Spacer(Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(12.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
 
-            Text(
-                "TOTAL MES: ${
-                    formatoMinutos(
-                        dias.sumOf {
-                            calcularHoras(
-                                it.entrada,
-                                it.salida
-                            )
-                        }
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = {
+                        nombre = it
+                    },
+                    label = {
+                        Text("Nombre")
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    SelectorMes(
+                        mes,
+                        { mes = it },
+                        Modifier.weight(1f)
                     )
-                }",
-                style = MaterialTheme.typography.titleLarge
-            )
 
-            Spacer(Modifier.height(8.dp))
+                    SelectorAno(
+                        ano,
+                        { ano = it },
+                        Modifier.weight(1f)
+                    )
+                }
 
-            Button(
-                onClick = {
-                    val archivo =
-                        "Control_Horas_${meses[mes]}_$ano.pdf"
-
-                    crearPdfLauncher.launch(archivo)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("DESCARGAR COPIA EN PDF")
-            }
-
-            mensajePdf?.let {
-                Spacer(Modifier.height(4.dp))
-                Text(it)
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            val semanas = remember(dias, mes, ano) {
-                agruparPorSemanas(dias, mes, ano)
-            }
-
-            semanas.forEachIndexed { indiceSemana, semana ->
+                Spacer(Modifier.height(8.dp))
 
                 Text(
-                    "SEMANA ${indiceSemana + 1}",
-                    style = MaterialTheme.typography.titleMedium
+                    "TOTAL MES: ${
+                        formatoMinutos(
+                            dias.sumOf {
+                                calcularHoras(
+                                    it.entrada,
+                                    it.salida
+                                )
+                            }
+                        )
+                    }",
+                    style = MaterialTheme.typography.titleLarge
                 )
 
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(8.dp))
 
-                semana.forEach { d ->
+                Button(
+                    onClick = {
+                        val archivo =
+                            "Control_Horas_${meses[mes]}_$ano.pdf"
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(
-                                rememberScrollState()
-                            ),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(4.dp)
-                    ) {
+                        crearPdfLauncher.launch(archivo)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("DESCARGAR COPIA EN PDF")
+                }
 
-                        Text(
-                            "${d.nombreDia} ${d.dia}",
-                            modifier = Modifier.width(70.dp)
-                        )
+                mensajePdf?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(it)
+                }
 
-                        OutlinedTextField(
-                            value = d.entrada,
-                            onValueChange = { valor ->
+                Spacer(Modifier.height(12.dp))
 
-                                dias = dias.map { actual ->
-                                    if (actual.dia == d.dia) {
-                                        actual.copy(
-                                            entrada =
-                                                formatearHora(valor)
-                                        )
-                                    } else {
-                                        actual
-                                    }
-                                }
-                            },
-                            label = {
-                                Text("Entrada")
-                            },
-                            singleLine = true,
-                            keyboardOptions =
-                                KeyboardOptions(
-                                    keyboardType =
-                                        KeyboardType.Number
-                                ),
+                val semanas = remember(dias, mes, ano) {
+                    agruparPorSemanas(dias, mes, ano)
+                }
+
+                semanas.forEachIndexed { indiceSemana, semana ->
+
+                    Text(
+                        "SEMANA ${indiceSemana + 1}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(Modifier.height(4.dp))
+
+                    semana.forEach { d ->
+
+                        Row(
                             modifier = Modifier
-                                .width(105.dp)
-                                .onFocusChanged { estado ->
+                                .fillMaxWidth()
+                                .horizontalScroll(
+                                    rememberScrollState()
+                                ),
+                            horizontalArrangement =
+                                Arrangement.spacedBy(4.dp)
+                        ) {
 
-                                    if (
-                                        estado.isFocused &&
-                                        d.entrada.isBlank()
-                                    ) {
-                                        dias = dias.map { actual ->
-                                            if (actual.dia == d.dia) {
-                                                actual.copy(
-                                                    entrada =
-                                                        horaActual()
-                                                )
-                                            } else {
-                                                actual
+                            Text(
+                                "${d.nombreDia} ${d.dia}",
+                                modifier = Modifier.width(70.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = d.entrada,
+                                onValueChange = { valor ->
+
+                                    dias = dias.map { actual ->
+                                        if (actual.dia == d.dia) {
+                                            actual.copy(
+                                                entrada =
+                                                    formatearHora(valor)
+                                            )
+                                        } else {
+                                            actual
+                                        }
+                                    }
+                                },
+                                label = {
+                                    Text("Entrada")
+                                },
+                                singleLine = true,
+                                keyboardOptions =
+                                    KeyboardOptions(
+                                        keyboardType =
+                                            KeyboardType.Number
+                                    ),
+                                modifier = Modifier
+                                    .width(105.dp)
+                                    .onFocusChanged { estado ->
+
+                                        if (
+                                            estado.isFocused &&
+                                            d.entrada.isBlank()
+                                        ) {
+                                            dias = dias.map { actual ->
+                                                if (actual.dia == d.dia) {
+                                                    actual.copy(
+                                                        entrada =
+                                                            horaActual()
+                                                    )
+                                                } else {
+                                                    actual
+                                                }
                                             }
                                         }
                                     }
-                                }
-                        )
+                            )
 
-                        OutlinedTextField(
-                            value = d.salida,
-                            onValueChange = { valor ->
+                            OutlinedTextField(
+                                value = d.salida,
+                                onValueChange = { valor ->
 
-                                dias = dias.map { actual ->
-                                    if (actual.dia == d.dia) {
-                                        actual.copy(
-                                            salida =
-                                                formatearHora(valor)
-                                        )
-                                    } else {
-                                        actual
+                                    dias = dias.map { actual ->
+                                        if (actual.dia == d.dia) {
+                                            actual.copy(
+                                                salida =
+                                                    formatearHora(valor)
+                                            )
+                                        } else {
+                                            actual
+                                        }
                                     }
-                                }
-                            },
-                            label = {
-                                Text("Salida")
-                            },
-                            singleLine = true,
-                            keyboardOptions =
-                                KeyboardOptions(
-                                    keyboardType =
-                                        KeyboardType.Number
-                                ),
-                            modifier = Modifier
-                                .width(105.dp)
-                                .onFocusChanged { estado ->
+                                },
+                                label = {
+                                    Text("Salida")
+                                },
+                                singleLine = true,
+                                keyboardOptions =
+                                    KeyboardOptions(
+                                        keyboardType =
+                                            KeyboardType.Number
+                                    ),
+                                modifier = Modifier
+                                    .width(105.dp)
+                                    .onFocusChanged { estado ->
 
-                                    if (
-                                        estado.isFocused &&
-                                        d.salida.isBlank()
-                                    ) {
-                                        dias = dias.map { actual ->
-                                            if (actual.dia == d.dia) {
-                                                actual.copy(
-                                                    salida =
-                                                        horaActual()
-                                                )
-                                            } else {
-                                                actual
+                                        if (
+                                            estado.isFocused &&
+                                            d.salida.isBlank()
+                                        ) {
+                                            dias = dias.map { actual ->
+                                                if (actual.dia == d.dia) {
+                                                    actual.copy(
+                                                        salida =
+                                                            horaActual()
+                                                    )
+                                                } else {
+                                                    actual
+                                                }
                                             }
                                         }
                                     }
-                                }
-                        )
+                            )
 
-                        Text(
-                            formatoMinutos(
-                                calcularHoras(
-                                    d.entrada,
-                                    d.salida
-                                )
-                            ),
-                            modifier = Modifier.width(85.dp)
-                        )
+                            Text(
+                                formatoMinutos(
+                                    calcularHoras(
+                                        d.entrada,
+                                        d.salida
+                                    )
+                                ),
+                                modifier = Modifier.width(85.dp)
+                            )
 
-                        OutlinedTextField(
-                            value = d.descripcion,
-                            onValueChange = { valor ->
+                            OutlinedTextField(
+                                value = d.descripcion,
+                                onValueChange = { valor ->
 
-                                dias = dias.map { actual ->
-                                    if (actual.dia == d.dia) {
-                                        actual.copy(
-                                            descripcion = valor
-                                        )
-                                    } else {
-                                        actual
+                                    dias = dias.map { actual ->
+                                        if (actual.dia == d.dia) {
+                                            actual.copy(
+                                                descripcion = valor
+                                            )
+                                        } else {
+                                            actual
+                                        }
                                     }
-                                }
-                            },
-                            label = {
-                                Text("Qué hice")
-                            },
-                            singleLine = true,
-                            modifier = Modifier.width(180.dp)
+                                },
+                                label = {
+                                    Text("Qué hice")
+                                },
+                                singleLine = true,
+                                modifier = Modifier.width(180.dp)
+                            )
+                        }
+
+                        Spacer(Modifier.height(4.dp))
+                    }
+
+                    val totalSemana = semana.sumOf {
+                        calcularHoras(
+                            it.entrada,
+                            it.salida
                         )
                     }
 
-                    Spacer(Modifier.height(4.dp))
-                }
-
-                val totalSemana = semana.sumOf {
-                    calcularHoras(
-                        it.entrada,
-                        it.salida
-                    )
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = 4.dp,
-                            bottom = 12.dp
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                top = 4.dp,
+                                bottom = 12.dp
+                            )
+                    ) {
+                        Text(
+                            "TOTAL SEMANA ${indiceSemana + 1}: ${
+                                formatoMinutos(totalSemana)
+                            }",
+                            style =
+                                MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(12.dp)
                         )
-                ) {
-                    Text(
-                        "TOTAL SEMANA ${indiceSemana + 1}: ${
-                            formatoMinutos(totalSemana)
-                        }",
-                        style =
-                            MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(12.dp)
-                    )
+                    }
                 }
             }
         }
@@ -429,18 +456,9 @@ fun SelectorMes(
 ) {
 
     val meses = listOf(
-        "Enero",
-        "Febrero",
-        "Marzo",
-        "Abril",
-        "Mayo",
-        "Junio",
-        "Julio",
-        "Agosto",
-        "Septiembre",
-        "Octubre",
-        "Noviembre",
-        "Diciembre"
+        "Enero", "Febrero", "Marzo", "Abril",
+        "Mayo", "Junio", "Julio", "Agosto",
+        "Septiembre", "Octubre", "Noviembre", "Diciembre"
     )
 
     var abierto by remember {
@@ -476,6 +494,7 @@ fun SelectorMes(
                 abierto = false
             }
         ) {
+
             meses.forEachIndexed { i, m ->
 
                 DropdownMenuItem(
@@ -626,11 +645,8 @@ fun formatearHora(
         }.take(4)
 
     return when (digitos.length) {
-
         0 -> ""
-
         1, 2, 3 -> digitos
-
         else ->
             "${digitos.substring(0, 2)}:${
                 digitos.substring(2, 4)
@@ -650,19 +666,16 @@ fun calcularHoras(
         0
     } else {
 
-        val e =
-            entrada.split(":")
-
-        val s =
-            salida.split(":")
+        val e = entrada.split(":")
+        val s = salida.split(":")
 
         val inicio =
             e[0].toInt() * 60 +
-            e[1].toInt()
+                    e[1].toInt()
 
         var fin =
             s[0].toInt() * 60 +
-            s[1].toInt()
+                    s[1].toInt()
 
         if (fin < inicio) {
             fin += 1440
@@ -695,8 +708,7 @@ fun crearPdf(
     mes: Int
 ) {
 
-    val documento =
-        PdfDocument()
+    val documento = PdfDocument()
 
     val ancho = 595
     val alto = 842
@@ -730,9 +742,7 @@ fun crearPdf(
             ).create()
         )
 
-    var canvas =
-        pagina.canvas
-
+    var canvas = pagina.canvas
     var y = 45
 
     fun nuevaPagina() {
@@ -764,9 +774,7 @@ fun crearPdf(
     y += 28
 
     canvas.drawText(
-        "Nombre: ${
-            if (nombre.isBlank()) "-" else nombre
-        }",
+        "Nombre: ${if (nombre.isBlank()) "-" else nombre}",
         margen.toFloat(),
         y.toFloat(),
         pintura
@@ -813,20 +821,16 @@ fun crearPdf(
 
             val linea =
                 "${d.nombreDia} ${d.dia}    " +
-                "Entrada: ${
-                    d.entrada.ifBlank { "-" }
-                }    " +
-                "Salida: ${
-                    d.salida.ifBlank { "-" }
-                }    " +
-                "Total: ${
-                    formatoMinutos(
-                        calcularHoras(
-                            d.entrada,
-                            d.salida
-                        )
-                    )
-                }"
+                        "Entrada: ${d.entrada.ifBlank { "-" }}    " +
+                        "Salida: ${d.salida.ifBlank { "-" }}    " +
+                        "Total: ${
+                            formatoMinutos(
+                                calcularHoras(
+                                    d.entrada,
+                                    d.salida
+                                )
+                            )
+                        }"
 
             canvas.drawText(
                 linea,
@@ -837,9 +841,7 @@ fun crearPdf(
 
             y += 16
 
-            if (
-                d.descripcion.isNotBlank()
-            ) {
+            if (d.descripcion.isNotBlank()) {
 
                 canvas.drawText(
                     "   Qué hice: ${d.descripcion}",
@@ -923,22 +925,10 @@ fun guardarDias(
         ar.put(
             JSONObject()
                 .put("dia", d.dia)
-                .put(
-                    "nombreDia",
-                    d.nombreDia
-                )
-                .put(
-                    "entrada",
-                    d.entrada
-                )
-                .put(
-                    "salida",
-                    d.salida
-                )
-                .put(
-                    "descripcion",
-                    d.descripcion
-                )
+                .put("nombreDia", d.nombreDia)
+                .put("entrada", d.entrada)
+                .put("salida", d.salida)
+                .put("descripcion", d.descripcion)
         )
     }
 
