@@ -100,8 +100,32 @@ fun ControlHorasApp(context: Context) {
         guardarDias(context, mes, ano, dias)
     }
 
+Box(
+    modifier = Modifier.fillMaxSize()
+) {
+
+    Image(
+        painter = painterResource(
+            id = R.drawable.icono_tu_tiempo_trabajado
+        ),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(30.dp)
+            .alpha(0.08f),
+        alignment = Alignment.Center
+    )
+
     Scaffold(
-        topBar = { TopAppBar(title = { Text("CONTROL HORAS") }) }
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("CONTROL HORAS")
+                }
+            )
+        }
     ) { padding ->
         Column(
             Modifier
